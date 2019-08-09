@@ -113,9 +113,10 @@ const bookingRules = [
 ];
 
 const busySlots = [
-  { id: 1, from: 10, until: 12 },
+  { id: 1, from: 10, until: 13 },
   { id: 2, from: 15, until: 16 },
-  { id: 3, from: 23, until: 24 }
+  { id: 3, from: 17, until: 18 },
+  { id: 4, from: 23, until: 25 }
 ];
 
 const peakTimes = {
@@ -199,29 +200,43 @@ const App: React.FC = () => {
       const before = busySlots.filter(b => b.until <= time);
       const after = busySlots.filter(b => b.from >= time);
 
-      if (before.length > 0 && times.length === 0) {
+      let ignoreDistanceChecks = false;
+      if (before.length > 0 && after.length > 0) {
         const last = before[before.length - 1];
+        const first = after[0];
 
-        const distance = (time - (last.until + 1)) * 60;
-        if (distance > 0 && distance < rulesToCheck.minDistanceBetweenSlots) {
-          alert(
-            `Please leave no gap or at least ${rulesToCheck.minDistanceBetweenSlots /
-              60} hours inbetween slots`
-          );
-          return;
+        const distance = (first.from - last.until) * 60;
+
+        if (distance <= rulesToCheck.minDistanceBetweenSlots) {
+          ignoreDistanceChecks = true;
         }
       }
 
-      if (after.length > 0) {
-        const first = after[0];
-        const distance = (first.from - 1 - time) * 60;
+      if (!ignoreDistanceChecks) {
+        if (before.length > 0 && times.length === 0) {
+          const last = before[before.length - 1];
 
-        if (distance > 0 && distance < rulesToCheck.minDistanceBetweenSlots) {
-          alert(
-            `Please leave no gap or at least ${rulesToCheck.minDistanceBetweenSlots /
-              60} hours inbetween slots`
-          );
-          return;
+          const distance = (time - (last.until + 1)) * 60;
+          if (distance > 0 && distance < rulesToCheck.minDistanceBetweenSlots) {
+            alert(
+              `Please leave no gap or at least ${rulesToCheck.minDistanceBetweenSlots /
+                60} hours inbetween slots`
+            );
+            return;
+          }
+        }
+
+        if (after.length > 0) {
+          const first = after[0];
+          const distance = (first.from - 1 - time) * 60;
+
+          if (distance > 0 && distance < rulesToCheck.minDistanceBetweenSlots) {
+            alert(
+              `Please leave no gap or at least ${rulesToCheck.minDistanceBetweenSlots /
+                60} hours inbetween slots`
+            );
+            return;
+          }
         }
       }
     }
@@ -266,7 +281,7 @@ const App: React.FC = () => {
 
           {openingHours.map((x: number) => {
             const isBusy =
-              busySlots.filter((b: any) => x >= b.from && x <= b.until).length >
+              busySlots.filter((b: any) => x >= b.from && x < b.until).length >
               0;
 
             const isSelected =
