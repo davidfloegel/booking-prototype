@@ -216,7 +216,9 @@ const App: React.FC = () => {
         if (before.length > 0 && times.length === 0) {
           const last = before[before.length - 1];
 
-          const distance = (time - (last.until + 1)) * 60;
+          const distance = (time - last.until) * 60;
+
+          console.log(last, distance, time);
           if (distance > 0 && distance < rulesToCheck.minDistanceBetweenSlots) {
             alert(
               `Please leave no gap or at least ${rulesToCheck.minDistanceBetweenSlots /
