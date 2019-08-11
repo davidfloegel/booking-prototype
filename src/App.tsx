@@ -145,7 +145,7 @@ const bookingRules = [
 ];
 
 const busySlots = [
-  { id: 1, from: 10, until: 13 },
+  // { id: 1, from: 10, until: 13 },
   { id: 2, from: 15, until: 16 },
   { id: 3, from: 17, until: 19 }
   // { id: 4, from: 23, until: 25 }
@@ -236,7 +236,7 @@ const App: React.FC = () => {
       const after = busySlots.filter(b => b.from >= time);
 
       let ignoreDistanceChecks = false;
-      if (before.length > 0 && after.length > 0) {
+      if (times.length > 0 && before.length > 0 && after.length > 0) {
         const last = before[before.length - 1];
         const first = after[0];
 
@@ -272,6 +272,38 @@ const App: React.FC = () => {
                 60} hours inbetween slots`
             );
             return;
+          }
+        }
+
+        if (times.length === 0) {
+          const distanceToOpening = (time - openingHours[0]) * 60;
+
+          if (
+            distanceToOpening > 0 &&
+            distanceToOpening < rulesToCheck.minDistanceBetweenSlots
+          ) {
+            setErrorMsg(
+              `Please leave no gap or at least ${rulesToCheck.minDistanceBetweenSlots /
+                60} hours between your slot and the opening time`
+            );
+          }
+        }
+
+        if (times.length > 0) {
+          const distanceToClosing =
+            (openingHours[openingHours.length - 1] -
+              times[times.length - 1] -
+              1) *
+            60;
+
+          if (
+            distanceToClosing > 0 &&
+            distanceToClosing < rulesToCheck.minDistanceBetweenSlots
+          ) {
+            setErrorMsg(
+              `Please leave no gap or at least ${rulesToCheck.minDistanceBetweenSlots /
+                60} hours between your slot and the closing time`
+            );
           }
         }
       }
