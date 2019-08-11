@@ -2,23 +2,43 @@ import React, { useState } from "react";
 import styled, { css } from "styled-components";
 
 const Container = styled.div`
-  width: 900px;
-  display: flex;
+  width: 100%;
+  height: 100vh;
   margin: 0 auto;
+
+  max-width: 400px;
 `;
 
 const Left = styled.div`
-  width: 600px;
+  width: 100%;
+  height: calc(100vh - 50px);
+  overflow-y: scroll;
+  // border: 1px solid red;
 `;
-
 const Right = styled.div`
+  display: none;
   width: 300px;
   padding: 0 50px;
 `;
 
+const Heading = styled.div`
+  height: 50px;
+  background: #fff;
+  border-bottom: 1px solid #ccc;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  h1 {
+    font-size: 20px;
+    margin: 0;
+    padding: 0;
+  }
+`;
+
 const Grid = styled.div`
-  margin-top: 50px;
-  border: 1px solid #ccc;
+  // border: 1px solid #ccc;
 `;
 
 const Header = styled.div`
@@ -83,6 +103,18 @@ const TimeSlot = styled.div<any>`
   `};
 `;
 
+const ErrorMessage = styled.div`
+  background: #eb4d4b;
+  color: #fff;
+  font-size: 14px;
+  border-radius: 4px;
+  padding: 10px;
+  position: absolute;
+  top: 60px;
+  left: 5px;
+  right: 5px;
+`;
+
 const openingHours = [
   10,
   11,
@@ -115,8 +147,8 @@ const bookingRules = [
 const busySlots = [
   { id: 1, from: 10, until: 13 },
   { id: 2, from: 15, until: 16 },
-  { id: 3, from: 17, until: 18 },
-  { id: 4, from: 23, until: 25 }
+  { id: 3, from: 17, until: 19 }
+  // { id: 4, from: 23, until: 25 }
 ];
 
 const peakTimes = {
@@ -168,8 +200,11 @@ const renderRow = (
 
 const App: React.FC = () => {
   const [selectedTimes, setSelectedTimes] = useState<any>([]);
+  const [errorMsg, setErrorMsg] = useState<string>();
 
   const onClickRow = (time: number, price: number) => {
+    setErrorMsg(undefined);
+
     const rulesToCheck = bookingRules[0]; // check multiple
     const times = selectedTimes.map((x: any) => x.time);
 
@@ -218,9 +253,8 @@ const App: React.FC = () => {
 
           const distance = (time - last.until) * 60;
 
-          console.log(last, distance, time);
           if (distance > 0 && distance < rulesToCheck.minDistanceBetweenSlots) {
-            alert(
+            setErrorMsg(
               `Please leave no gap or at least ${rulesToCheck.minDistanceBetweenSlots /
                 60} hours inbetween slots`
             );
@@ -233,7 +267,7 @@ const App: React.FC = () => {
           const distance = (first.from - 1 - time) * 60;
 
           if (distance > 0 && distance < rulesToCheck.minDistanceBetweenSlots) {
-            alert(
+            setErrorMsg(
               `Please leave no gap or at least ${rulesToCheck.minDistanceBetweenSlots /
                 60} hours inbetween slots`
             );
@@ -258,7 +292,7 @@ const App: React.FC = () => {
       );
 
       if (containsBusySlot.length > 0) {
-        alert(`Your booking range contains busy slots`);
+        setErrorMsg(`Your booking range contains busy slots`);
       } else {
         setSelectedTimes(addTimes.sort());
       }
@@ -272,9 +306,10 @@ const App: React.FC = () => {
 
   return (
     <Container>
-      <Left>
+      <Heading>
         <h1>Make a booking</h1>
-
+      </Heading>
+      <Left>
         <Grid>
           <Header>
             <TimeCol>&nbsp;</TimeCol>
@@ -308,6 +343,8 @@ const App: React.FC = () => {
           .map((x: any) => x.price)
           .reduce((a: number, b: number) => a + b, 0)}
       </Right>
+
+      {errorMsg && <ErrorMessage>{errorMsg}</ErrorMessage>}
     </Container>
   );
 };
