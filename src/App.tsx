@@ -236,7 +236,7 @@ const App: React.FC = () => {
       const after = busySlots.filter(b => b.from >= time);
 
       let ignoreDistanceChecks = false;
-      if (times.length > 0 && before.length > 0 && after.length > 0) {
+      if (before.length > 0 && after.length > 0) {
         const last = before[before.length - 1];
         const first = after[0];
 
