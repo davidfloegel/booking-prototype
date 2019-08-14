@@ -1,5 +1,5 @@
 import validateSlot, { getRulesToVerifiy } from "./validateBookingRules";
-import { BookingRule } from "./interfaces";
+import { BookingRule, ExistingBooking } from "./interfaces";
 
 const mockBookingRules: BookingRule[] = [
   {
@@ -39,11 +39,37 @@ describe("getRulesToVerifiy", () => {
 });
 
 describe("validateBookingRules", () => {
-  const openingHours = [10, 24];
+  const openingHours: [number, number] = [10, 24];
+
+  describe("Opening Hours", () => {
+    it("throws an error if booking starts before opening hours", () => {
+      expect(() => validateSlot(openingHours, [], [], [8, 13])).toThrowError(
+        "Selected slot isn't within opening hours (10 - 24)"
+      );
+    });
+
+    it("throws an error if booking ends after opening hours", () => {
+      expect(() => validateSlot([10, 18], [], [], [15, 23])).toThrowError(
+        "Selected slot isn't within opening hours (10 - 18)"
+      );
+    });
+
+    it("throws an error if booking starts and ends before opening hours", () => {
+      expect(() => validateSlot(openingHours, [], [], [6, 10])).toThrowError(
+        "Selected slot isn't within opening hours (10 - 24)"
+      );
+    });
+
+    it("throws an error if booking starts and ends after opening hours", () => {
+      expect(() => validateSlot([10, 18], [], [], [18, 20])).toThrowError(
+        "Selected slot isn't within opening hours (10 - 18)"
+      );
+    });
+  });
 
   describe("Overlaps", () => {
     const rules: BookingRule[] = [];
-    const existing = [{ id: 1, from: 12, until: 17 }];
+    const existing: ExistingBooking[] = [{ id: 1, from: 12, until: 17 }];
 
     it("throws an error if slot overlaps a following slot", () => {
       expect(() =>
@@ -108,26 +134,32 @@ describe("validateBookingRules", () => {
     });
 
     it("throws an error if slot is too close to a previous existing slot", () => {
-      const existing = [{ id: 1, from: 10, until: 12 }];
+      const existing: ExistingBooking[] = [{ id: 1, from: 10, until: 12 }];
 
-      expect(() => validateSlot([], existing, rules, [13, 15])).toThrowError(
+      expect(() =>
+        validateSlot(openingHours, existing, rules, [13, 15])
+      ).toThrowError(
         "Please leave no gap or at least 2 hours between existing bookings and your slot"
       );
     });
 
     it("throws an error if slot is too close to a following existing slot", () => {
-      const existing = [{ id: 1, from: 15, until: 20 }];
-      expect(() => validateSlot([], existing, rules, [10, 14])).toThrowError(
+      const existing: ExistingBooking[] = [{ id: 1, from: 15, until: 20 }];
+      expect(() =>
+        validateSlot(openingHours, existing, rules, [10, 14])
+      ).toThrowError(
         "Please leave no gap or at least 2 hours between existing bookings and your slot"
       );
     });
 
     it("throws an error if slot is too close to a surrounding existing slot", () => {
-      const existing = [
+      const existing: ExistingBooking[] = [
         { id: 1, from: 12, until: 15 },
         { id: 2, from: 20, until: 22 }
       ];
-      expect(() => validateSlot([], existing, rules, [16, 19])).toThrowError(
+      expect(() =>
+        validateSlot(openingHours, existing, rules, [16, 19])
+      ).toThrowError(
         "Please leave no gap or at least 2 hours between existing bookings and your slot"
       );
     });

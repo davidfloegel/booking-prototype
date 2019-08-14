@@ -1,6 +1,6 @@
 import _ from "lodash";
 
-import { BookingRule } from "./interfaces";
+import { BookingRule, ExistingBooking } from "./interfaces";
 
 // get the booking rules that we actually need to verify
 // based on the given day and times
@@ -25,13 +25,25 @@ export const getRulesToVerifiy = (
 // main function that takes the selected booking slot
 // and validates it against the studios booking rules
 export default (
-  openingHours: any,
-  existingSlots: any,
-  rulesToVerify: any,
-  selectedSlot: any
+  openingHours: [number, number],
+  existingSlots: ExistingBooking[],
+  rulesToVerify: BookingRule[],
+  selectedSlot: [number, number]
 ) => {
-  // 1. check if booking is overlapping existing slots
-  const isOverlapping = existingSlots.filter((e: any) => {
+  // check if bookings starts + ends within opening hours
+  const startsBeforeOpening = selectedSlot[0] < openingHours[0];
+  const endsAfterClosing = selectedSlot[1] >= openingHours[1];
+
+  if (startsBeforeOpening || endsAfterClosing) {
+    throw new Error(
+      `Selected slot isn't within opening hours (${openingHours[0]} - ${
+        openingHours[1]
+      })`
+    );
+  }
+
+  // check if booking is overlapping existing slots
+  const isOverlapping = existingSlots.filter((e: ExistingBooking) => {
     const [f, u] = selectedSlot;
     const { from, until } = e;
 
@@ -57,9 +69,11 @@ export default (
     if (rule.minDistanceBetweenSlots) {
       // find slots starting before selected time
       const before = existingSlots.filter(
-        (b: any) => b.until <= selectedSlot[0]
+        (b: ExistingBooking) => b.until <= selectedSlot[0]
       );
-      const after = existingSlots.filter((b: any) => b.from >= selectedSlot[1]);
+      const after = existingSlots.filter(
+        (b: ExistingBooking) => b.from >= selectedSlot[1]
+      );
 
       // check if enough distance to opening time
       const distanceToOpeningHour = (selectedSlot[0] - openingHours[0]) * 60;

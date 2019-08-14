@@ -9,3 +9,9 @@ export interface BookingRule {
   allowFillSlots?: number;
   minDistanceBetweenSlots?: number;
 }
+
+export interface ExistingBooking {
+  id: number;
+  from: number;
+  until: number;
+}
