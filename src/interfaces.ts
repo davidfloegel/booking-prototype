@@ -6,7 +6,7 @@ export interface BookingRule {
   validAfter?: number;
 
   minLength?: number;
-  allowFillSlots?: number;
+  allowFillSlots?: true;
   minDistanceBetweenSlots?: number;
 }
 

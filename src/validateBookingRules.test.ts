@@ -164,4 +164,47 @@ describe("validateBookingRules", () => {
       );
     });
   });
+
+  describe("allowFillSlots", () => {
+    it("throws an error if the user is not allowed to fill slots less with length than the minLength", () => {
+      const rules: BookingRule[] = [
+        {
+          id: "1",
+          days: ["mon"],
+          allDay: true,
+          minLength: 180
+        }
+      ];
+
+      const existing = [
+        { id: 1, from: 12, until: 15 },
+        { id: 2, from: 17, until: 20 }
+      ];
+
+      expect(() =>
+        validateSlot(openingHours, existing, rules, [15, 17])
+      ).toThrowError("You have to book at least 3 hours");
+    });
+
+    it("does not throw an error if user is allowed to fill slots with length less than minLength", () => {
+      const rules: BookingRule[] = [
+        {
+          id: "1",
+          days: ["mon"],
+          allDay: true,
+          minLength: 180,
+          allowFillSlots: true
+        }
+      ];
+
+      const existing = [
+        { id: 1, from: 12, until: 15 },
+        { id: 2, from: 17, until: 20 }
+      ];
+
+      expect(() =>
+        validateSlot(openingHours, existing, rules, [15, 17])
+      ).not.toThrowError();
+    });
+  });
 });

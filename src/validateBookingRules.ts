@@ -36,9 +36,7 @@ export default (
 
   if (startsBeforeOpening || endsAfterClosing) {
     throw new Error(
-      `Selected slot isn't within opening hours (${openingHours[0]} - ${
-        openingHours[1]
-      })`
+      `Selected slot isn't within opening hours (${openingHours[0]} - ${openingHours[1]})`
     );
   }
 
@@ -59,22 +57,31 @@ export default (
   }
 
   rulesToVerify.forEach((rule: BookingRule) => {
+    const before = existingSlots.filter(
+      (b: ExistingBooking) => b.until <= selectedSlot[0]
+    );
+    const after = existingSlots.filter(
+      (b: ExistingBooking) => b.from >= selectedSlot[1]
+    );
+
     if (rule.minLength) {
       const length = selectedSlot[1] - selectedSlot[0];
       if (length < rule.minLength) {
-        throw new Error("You have to book at least 3 hours");
+        if (rule.allowFillSlots) {
+          // check whether the user is filling a slot less than min booking length
+          if (before.length > 0 && after.length > 0) {
+            const last = before[before.length - 1];
+            const first = after[0];
+
+            const distance = (first.from - last.until) * 60;
+          }
+        } else {
+          throw new Error("You have to book at least 3 hours");
+        }
       }
     }
 
     if (rule.minDistanceBetweenSlots) {
-      // find slots starting before selected time
-      const before = existingSlots.filter(
-        (b: ExistingBooking) => b.until <= selectedSlot[0]
-      );
-      const after = existingSlots.filter(
-        (b: ExistingBooking) => b.from >= selectedSlot[1]
-      );
-
       // check if enough distance to opening time
       const distanceToOpeningHour = (selectedSlot[0] - openingHours[0]) * 60;
       if (
