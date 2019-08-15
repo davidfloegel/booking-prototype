@@ -65,6 +65,8 @@ export default (
     );
 
     if (rule.minLength) {
+      // check if slot length is matching the minimum booking length
+      //
       const length = selectedSlot[1] - selectedSlot[0];
       if (length < rule.minLength) {
         if (rule.allowFillSlots) {
