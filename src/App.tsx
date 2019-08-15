@@ -219,94 +219,9 @@ const App: React.FC = () => {
       }
 
       // unselect all slots after the selected time
-      setSelectedTimes([...selectedTimes.slice(0, idx + 1)]);
+      setSelectedTimes([...selectedTimes.slice(0, idx === 0 ? 0 : idx + 1)]);
 
       return;
-    }
-
-    // check if user is leaving at least 2 hours between existing slots
-    // when selecting the first time
-    if (
-      rulesToCheck.minDistanceBetweenSlots &&
-      times.length >= 0 &&
-      busySlots.length > 0
-    ) {
-      // find slots starting before selected time
-      const before = busySlots.filter(b => b.until <= time);
-      const after = busySlots.filter(b => b.from >= time);
-
-      let ignoreDistanceChecks = false;
-      if (before.length > 0 && after.length > 0) {
-        const last = before[before.length - 1];
-        const first = after[0];
-
-        const distance = (first.from - last.until) * 60;
-
-        if (distance <= rulesToCheck.minDistanceBetweenSlots) {
-          ignoreDistanceChecks = true;
-        }
-      }
-
-      if (!ignoreDistanceChecks) {
-        if (before.length > 0 && times.length === 0) {
-          const last = before[before.length - 1];
-
-          const distance = (time - last.until) * 60;
-
-          if (distance > 0 && distance < rulesToCheck.minDistanceBetweenSlots) {
-            setErrorMsg(
-              `Please leave no gap or at least ${rulesToCheck.minDistanceBetweenSlots /
-                60} hours inbetween slots`
-            );
-            return;
-          }
-        }
-
-        if (after.length > 0) {
-          const first = after[0];
-          const distance = (first.from - 1 - time) * 60;
-
-          if (distance > 0 && distance < rulesToCheck.minDistanceBetweenSlots) {
-            setErrorMsg(
-              `Please leave no gap or at least ${rulesToCheck.minDistanceBetweenSlots /
-                60} hours inbetween slots`
-            );
-            return;
-          }
-        }
-
-        if (times.length === 0) {
-          const distanceToOpening = (time - openingHours[0]) * 60;
-
-          if (
-            distanceToOpening > 0 &&
-            distanceToOpening < rulesToCheck.minDistanceBetweenSlots
-          ) {
-            setErrorMsg(
-              `Please leave no gap or at least ${rulesToCheck.minDistanceBetweenSlots /
-                60} hours between your slot and the opening time`
-            );
-          }
-        }
-
-        if (times.length > 0) {
-          const distanceToClosing =
-            (openingHours[openingHours.length - 1] -
-              times[times.length - 1] -
-              1) *
-            60;
-
-          if (
-            distanceToClosing > 0 &&
-            distanceToClosing < rulesToCheck.minDistanceBetweenSlots
-          ) {
-            setErrorMsg(
-              `Please leave no gap or at least ${rulesToCheck.minDistanceBetweenSlots /
-                60} hours between your slot and the closing time`
-            );
-          }
-        }
-      }
     }
 
     // select range
@@ -318,16 +233,7 @@ const App: React.FC = () => {
         addTimes.push({ time: i, price });
       }
 
-      // check if busy slot is within the selected range
-      const containsBusySlot = busySlots.filter(
-        (b: any) => b.from >= rangeStart && b.until <= time
-      );
-
-      if (containsBusySlot.length > 0) {
-        setErrorMsg(`Your booking range contains busy slots`);
-      } else {
-        setSelectedTimes(addTimes.sort());
-      }
+      setSelectedTimes(addTimes.sort());
     } else {
       // set initial time
       const price = getPriceForTime(time);
