@@ -49,7 +49,7 @@ describe("validateBookingRules", () => {
     });
 
     it("throws an error if booking ends after opening hours", () => {
-      expect(() => validateSlot([10, 18], [], [], [15, 23])).toThrowError(
+      expect(() => validateSlot([10, 18], [], [], [15, 19])).toThrowError(
         "Selected slot isn't within opening hours (10 - 18)"
       );
     });
@@ -102,9 +102,13 @@ describe("validateBookingRules", () => {
     const rules: BookingRule[] = [
       { id: "1", days: ["tue"], allDay: true, minLength: 180 }
     ];
-    expect(() => validateSlot(openingHours, [], rules, [13, 15])).toThrowError(
+    expect(() => validateSlot(openingHours, [], rules, [13, 14])).toThrowError(
       "You have to book at least 3 hours"
     );
+
+    expect(() =>
+      validateSlot(openingHours, [], rules, [12, 14])
+    ).not.toThrowError();
   });
 
   describe("minDistanceBetweenSlots", () => {
@@ -127,10 +131,14 @@ describe("validateBookingRules", () => {
 
     it("throws an error if slot is too close to closing hour", () => {
       expect(() =>
-        validateSlot(openingHours, [], rules, [18, 23])
+        validateSlot(openingHours, [], rules, [18, 22])
       ).toThrowError(
         "Please leave no gap or at least 2 hours between the closing hour and your slot"
       );
+
+      expect(() =>
+        validateSlot(openingHours, [], rules, [18, 21])
+      ).not.toThrowError();
     });
 
     it("throws an error if slot is too close to a previous existing slot", () => {
@@ -146,7 +154,7 @@ describe("validateBookingRules", () => {
     it("throws an error if slot is too close to a following existing slot", () => {
       const existing: ExistingBooking[] = [{ id: 1, from: 15, until: 20 }];
       expect(() =>
-        validateSlot(openingHours, existing, rules, [10, 14])
+        validateSlot(openingHours, existing, rules, [10, 13])
       ).toThrowError(
         "Please leave no gap or at least 2 hours between existing bookings and your slot"
       );
@@ -182,7 +190,7 @@ describe("validateBookingRules", () => {
       ];
 
       expect(() =>
-        validateSlot(openingHours, existing, rules, [15, 17])
+        validateSlot(openingHours, existing, rules, [15, 16])
       ).toThrowError("You have to book at least 3 hours");
     });
 

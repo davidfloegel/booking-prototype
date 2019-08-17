@@ -1,17 +1,20 @@
 import React, { useState } from "react";
 import styled, { css } from "styled-components";
+import CountUp from "react-countup";
+
+import validateSlot from "./validateBookingRules";
+import { ExistingBooking, BookingRule } from "./interfaces";
 
 const Container = styled.div`
   width: 100%;
   height: 100vh;
   margin: 0 auto;
-
   max-width: 400px;
 `;
 
 const Left = styled.div`
   width: 100%;
-  height: calc(100vh - 50px);
+  height: calc(100vh - 50px - 75px);
   overflow-y: scroll;
   // border: 1px solid red;
 `;
@@ -49,11 +52,11 @@ const Header = styled.div`
 
 const TimeCol = styled.div`
   height: 40px;
-  width: 50px;
+  width: 70px;
   border-right: 1px solid #ccc;
   display: flex;
   align-items: center;
-  padding: 0 15px;
+  justify-content: center;
 `;
 
 const Row = styled(Header)`
@@ -115,6 +118,52 @@ const ErrorMessage = styled.div`
   right: 5px;
 `;
 
+const Footer = styled.div`
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 75px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.25);
+  padding: 0 10px;
+`;
+
+const Total = styled.div`
+  flex: 1;
+`;
+
+const Price = styled.div`
+  font-size: 25px;
+  font-weight: bold;
+  margin-bottom: 2px;
+`;
+const TotalLabel = styled.div`
+  font-size: 12px;
+  color: #ccc;
+`;
+
+const ConfirmButton = styled.button<any>`
+  font-size: 16px;
+  padding: 15px 25px;
+  border: none;
+  background: #2ecc71;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+  outline: none;
+
+  ${({ disabled }) =>
+    disabled &&
+    css`
+      background: #eee;
+      color: #ccc;
+    `};
+`;
+
 const openingHours = [
   10,
   11,
@@ -133,21 +182,21 @@ const openingHours = [
   24
 ];
 
-const bookingRules = [
+const bookingRules: BookingRule[] = [
   {
-    days: ["mon", "tue", "wed", "thu", "fri", "sat", "sun"], // on which days does this rule apply
-    allDay: true, // does this rule apply all day?
-    between: [10, 24], // if not all day, between what time does this rule apply
-    minBookingLength: 180, // what's the minimum booking length required? in minutes
-    allowFillSlots: true, // allow people to book slots shorter than the min if they fill up holes
-    minDistanceBetweenSlots: 120 // if leaving space between exisiting bookings, how many minutes at least?
+    id: "1",
+    days: ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+    allDay: true,
+    minLength: 180,
+    allowFillSlots: true,
+    minDistanceBetweenSlots: 120
   }
 ];
 
-const busySlots = [
+const busySlots: ExistingBooking[] = [
   // { id: 1, from: 10, until: 13 },
-  { id: 2, from: 15, until: 16 },
-  { id: 3, from: 17, until: 19 }
+  // { id: 2, from: 15, until: 16 },
+  // { id: 3, from: 17, until: 19 },
   // { id: 4, from: 23, until: 25 }
 ];
 
@@ -200,6 +249,7 @@ const renderRow = (
 
 const App: React.FC = () => {
   const [selectedTimes, setSelectedTimes] = useState<any>([]);
+  const [isValid, setIsValid] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string>();
 
   const onClickRow = (time: number, price: number) => {
@@ -207,6 +257,8 @@ const App: React.FC = () => {
 
     const rulesToCheck = bookingRules[0]; // check multiple
     const times = selectedTimes.map((x: any) => x.time);
+
+    let updatedTimes = selectedTimes;
 
     // unselect?
     const isSelected = times.indexOf(time) > -1;
@@ -216,30 +268,61 @@ const App: React.FC = () => {
       if (times.length === 1) {
         setSelectedTimes([]);
         return;
+      } else {
+        // unselect all slots after the selected time
+        updatedTimes = [...selectedTimes.slice(0, idx + 1)];
       }
-
-      // unselect all slots after the selected time
-      setSelectedTimes([...selectedTimes.slice(0, idx === 0 ? 0 : idx + 1)]);
-
-      return;
-    }
-
-    // select range
-    let addTimes = [];
-    if (times.length >= 1) {
-      const rangeStart = times[0];
-      for (let i = rangeStart; i <= time; i++) {
-        const price = getPriceForTime(i);
-        addTimes.push({ time: i, price });
-      }
-
-      setSelectedTimes(addTimes.sort());
     } else {
-      // set initial time
-      const price = getPriceForTime(time);
-      addTimes = [{ time, price }];
-      setSelectedTimes([...selectedTimes, ...addTimes].sort());
+      // select range
+      let addTimes = [];
+      if (times.length >= 1) {
+        const rangeStart = times[0];
+        for (let i = rangeStart; i <= time; i++) {
+          const price = getPriceForTime(i);
+          addTimes.push({ time: i, price });
+        }
+
+        updatedTimes = addTimes.sort();
+      } else {
+        // set initial time
+        const price = getPriceForTime(time);
+        addTimes = [{ time, price }];
+        updatedTimes = [...selectedTimes, ...addTimes].sort();
+      }
     }
+
+    setSelectedTimes(updatedTimes);
+    setIsValid(true);
+  };
+
+  const onConfirm = () => {
+    const updatedTimes = selectedTimes;
+    try {
+      const selectedSlot: [number, number] = [
+        updatedTimes[0].time,
+        updatedTimes[updatedTimes.length - 1].time
+      ];
+      const hours: [number, number] = [
+        openingHours[0],
+        openingHours[openingHours.length - 1]
+      ];
+      validateSlot(hours, busySlots, bookingRules, selectedSlot);
+      setIsValid(true);
+
+      alert("Your booking is valid :)");
+    } catch (e) {
+      setIsValid(false);
+      console.log(e);
+      setErrorMsg(e.message);
+    }
+  };
+
+  const calcTotal = () => {
+    let total = 0;
+    selectedTimes.forEach((t: any) => {
+      total += t.price;
+    });
+    return total;
   };
 
   return (
@@ -254,7 +337,7 @@ const App: React.FC = () => {
             <RoomName>The Green Room</RoomName>
           </Header>
 
-          {openingHours.map((x: number) => {
+          {openingHours.slice(0, openingHours.length - 1).map((x: number) => {
             const isBusy =
               busySlots.filter((b: any) => x >= b.from && x < b.until).length >
               0;
@@ -283,6 +366,27 @@ const App: React.FC = () => {
       </Right>
 
       {errorMsg && <ErrorMessage>{errorMsg}</ErrorMessage>}
+
+      <Footer>
+        <Total>
+          <Price>
+            <CountUp
+              duration={0.25}
+              prefix="£"
+              decimals={2}
+              decimal="."
+              end={calcTotal()}
+            />
+          </Price>
+          <TotalLabel>Total Booking Price</TotalLabel>
+        </Total>
+        <ConfirmButton
+          onClick={onConfirm}
+          disabled={!isValid || selectedTimes.length === 0}
+        >
+          Confirm
+        </ConfirmButton>
+      </Footer>
     </Container>
   );
 };
