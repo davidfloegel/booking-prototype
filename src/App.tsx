@@ -71,6 +71,12 @@ const App: React.FC = () => {
 
     let updatedTimes = selectedTimes;
 
+    if (times.length > 1) {
+      if (time < times[0]) {
+        return setSelectedTimes([{ time, price: getPriceForTime(time) }]);
+      }
+    }
+
     // unselect?
     const isSelected = times.indexOf(time) > -1;
     if (isSelected) {
@@ -102,8 +108,23 @@ const App: React.FC = () => {
       }
     }
 
-    setSelectedTimes(updatedTimes);
-    setIsValid(true);
+    try {
+      const selectedSlot: [number, number] = [
+        updatedTimes[0].time,
+        updatedTimes[updatedTimes.length - 1].time
+      ];
+      const hours: [number, number] = [
+        openingHours[0],
+        openingHours[openingHours.length - 1]
+      ];
+      validateSlot(hours, busySlots, bookingRules, selectedSlot);
+
+      setSelectedTimes(updatedTimes);
+      setIsValid(true);
+    } catch (e) {
+      setIsValid(false);
+      setErrorMsg(e.message);
+    }
   };
 
   const onConfirm = () => {
@@ -117,13 +138,12 @@ const App: React.FC = () => {
         openingHours[0],
         openingHours[openingHours.length - 1]
       ];
-      validateSlot(hours, busySlots, bookingRules, selectedSlot);
+      validateSlot(hours, busySlots, bookingRules, selectedSlot, true);
       setIsValid(true);
 
       alert("Your booking is valid :)");
     } catch (e) {
       setIsValid(false);
-      console.log(e);
       setErrorMsg(e.message);
     }
   };
@@ -142,7 +162,7 @@ const App: React.FC = () => {
         <DatePicker
           base={new Date()}
           current={currentDay}
-          onNavigate={(d: Date) => setCurrentDay(d)}
+          onNavigate={setCurrentDay}
         />
         <Header>
           <TimeCol>&nbsp;</TimeCol>

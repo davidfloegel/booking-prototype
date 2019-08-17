@@ -102,9 +102,9 @@ describe("validateBookingRules", () => {
     const rules: BookingRule[] = [
       { id: "1", days: ["tue"], allDay: true, minLength: 180 }
     ];
-    expect(() => validateSlot(openingHours, [], rules, [13, 14])).toThrowError(
-      "You have to book at least 3 hours"
-    );
+    expect(() =>
+      validateSlot(openingHours, [], rules, [13, 14], true)
+    ).toThrowError("You have to book at least 3 hours");
 
     expect(() =>
       validateSlot(openingHours, [], rules, [12, 14])
@@ -190,7 +190,7 @@ describe("validateBookingRules", () => {
       ];
 
       expect(() =>
-        validateSlot(openingHours, existing, rules, [15, 16])
+        validateSlot(openingHours, existing, rules, [15, 16], true)
       ).toThrowError("You have to book at least 3 hours");
     });
 

@@ -36,7 +36,8 @@ export default (
   openingHours: [number, number],
   existingSlots: ExistingBooking[],
   rulesToVerify: BookingRule[],
-  selectedSlot: [number, number]
+  selectedSlot: [number, number],
+  isFinalCheck: boolean = false
 ) => {
   // check if bookings starts + ends within opening hours
   const startsBeforeOpening = selectedSlot[0] < openingHours[0];
@@ -76,7 +77,7 @@ export default (
 
     const isRangeSelection = selectedSlot[0] < selectedSlot[1];
 
-    if (rule.minLength) {
+    if (rule.minLength && isFinalCheck) {
       // check if slot length is matching the minimum booking length
       const length = (selectedSlot[1] + 1 - selectedSlot[0]) * 60;
 
