@@ -168,7 +168,11 @@ const App: React.FC = () => {
         })}
       </Scrollable>
 
-      {errorMsg && <ErrorMessage>{errorMsg}</ErrorMessage>}
+      {errorMsg && (
+        <ErrorMessage onClose={() => setErrorMsg(undefined)}>
+          {errorMsg}
+        </ErrorMessage>
+      )}
 
       <Footer
         total={calcTotal()}

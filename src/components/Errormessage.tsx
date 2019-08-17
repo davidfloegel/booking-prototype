@@ -1,4 +1,5 @@
-import styled, { keyframes } from "styled-components";
+import React, { useState } from "react";
+import styled, { css, keyframes } from "styled-components";
 
 const animateUp = keyframes`
   0% {
@@ -20,7 +21,18 @@ const animateUp = keyframes`
 }
 `;
 
-export default styled.div`
+const fadeOut = keyframes`
+  from {
+    opacity: 1;
+  }
+
+  to {
+      opacity: 0;
+    display: none;
+  }
+`;
+
+const Msg = styled.div<any>`
   background: #eb4d4b;
   color: #fff;
   font-size: 14px;
@@ -31,4 +43,35 @@ export default styled.div`
   left: 5px;
   right: 5px;
   animation: ${animateUp} 0.1s linear;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  ${({ closing }) =>
+    closing &&
+    css`
+      animation: ${fadeOut} 0.1s linear;
+      animation-fill-mode: forwards;
+    `};
 `;
+
+const ErrorMsg: React.SFC<any> = ({ children, onClose }) => {
+  const [isClosing, setIsClosing] = useState(false);
+
+  const close = () => {
+    setIsClosing(true);
+
+    setTimeout(() => {
+      onClose();
+    }, 100);
+  };
+
+  return (
+    <Msg closing={isClosing}>
+      {children}
+      <i className="fa fa-times" onClick={close} />
+    </Msg>
+  );
+};
+
+export default ErrorMsg;
