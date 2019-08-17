@@ -16,7 +16,6 @@ const Left = styled.div`
   width: 100%;
   height: calc(100vh - 50px - 75px);
   overflow-y: scroll;
-  // border: 1px solid red;
 `;
 const Right = styled.div`
   display: none;
@@ -384,7 +383,7 @@ const App: React.FC = () => {
           onClick={onConfirm}
           disabled={!isValid || selectedTimes.length === 0}
         >
-          Confirm
+          Next
         </ConfirmButton>
       </Footer>
     </Container>

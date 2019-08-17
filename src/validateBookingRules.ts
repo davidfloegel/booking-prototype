@@ -2,6 +2,14 @@ import _ from "lodash";
 
 import { BookingRule, ExistingBooking } from "./interfaces";
 
+/**
+ * TODO
+ * - if last hour is a busy slot and minDistance is set, user tries to book until
+ *   the busy slot, it throws an error
+ *
+ *
+ */
+
 // get the booking rules that we actually need to verify
 // based on the given day and times
 export const getRulesToVerifiy = (
