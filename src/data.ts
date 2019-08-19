@@ -20,10 +20,18 @@ export const openingHours = [
 
 export const bookingRules: BookingRule[] = [
   {
-    id: "1",
-    days: ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+    id: "MIN-3-HOURS-DURING-PEAK",
+    days: ["mon", "tue", "wed", "thu", "fri"],
     allDay: true,
     minLength: 180,
+    allowFillSlots: true,
+    minDistanceBetweenSlots: 120
+  },
+  {
+    id: "MIN-4-HOURS-ON-WEEKEND",
+    days: ["sat", "sun"],
+    allDay: true,
+    minLength: 240,
     allowFillSlots: true,
     minDistanceBetweenSlots: 120
   }

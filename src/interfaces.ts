@@ -11,6 +11,12 @@
  *  allDay: true/false
  *    - is this rule valid all day?
  *
+ *  onlyInPeak: true/false
+ *    - execute this rule only during peak time
+ *
+ *  onlyInOffPeak: true/false
+ *    - execute this rule only during off peak time
+ *
  *  validBefore: 18
  *    - until what time on the given days should this rule be enforced
  *
@@ -33,11 +39,17 @@
  *  allowFillSlots: true/false
  *    - allow users to make bookings less than minLength if there's slots left that aren't
  *      long enough
+ *    - only executed when minLength is set
+ *
+ *  allowPeakOverlap: true/false
+ *    - allow users to book slots that start in peak and reach into off-peak times
  */
 export interface BookingRule {
   id: string;
   days: string[];
   allDay: boolean;
+  onlyInPeak?: boolean;
+  onlyInOffPeak?: boolean;
   validBefore?: number;
   validAfter?: number;
   executeUntilDaysBefore?: number;
@@ -46,10 +58,19 @@ export interface BookingRule {
   minDistanceBetweenSlots?: number;
 
   allowFillSlots?: true;
+  allowPeakOverlap?: boolean;
 }
 
 export interface ExistingBooking {
   id: number;
   from: number;
   until: number;
+}
+
+export interface BookingOption {
+  id: number;
+  title: string;
+  availableDays: string[];
+  availableAllDay: boolean;
+  availableTimes?: string[];
 }
