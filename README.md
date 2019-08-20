@@ -18,7 +18,7 @@ Timestable:
 - On Peak: 5pm - Close
 
 Prices:
-- Off Peak: £6.50 p/h
+- Off Peak: £10.00 p/h
 - On Peak: £17.50 p/h
 
 ### Solo Slot
@@ -27,8 +27,7 @@ Prices:
 
 - Available Monday - Friday, 11am - 5pm
 - Solo sessions *after 5pm* are only bookable on the day or the day before
-- Prices during the day are £6.50 p/h
-- Prices in the evening are £17.50 p/h
+- Solo bookings receive a 35% discount on prices
 
 ### Teaching Slot
 
@@ -48,5 +47,5 @@ Prices:
 - Available Monday - Friday, 11am - Close
 - Band Slots *after 5pm* require a minimum booking duration of 3 hours
 - Can book slots less than 3h if there's a slot available that's for example 1h or 2h
-- Prices during the day are £6.50 p/h
+- Prices during the day are £10.00 p/h
 - Prices in the evening are £17.50 p/h
