@@ -23,7 +23,7 @@
  *  validAfter: 12
  *    - after what time on the given days should this rule be enforced
  *
- *  executeUntilDaysBefore: 2
+ *  allowDaysAhead: 2
  *    - execute this rule until 2 days before. That means you could enforce
  *      a 3h minimum booking when people book 2 weeks in advance, but allow
  *      them to book 1h bookings on the day or the day before
@@ -46,13 +46,14 @@
  */
 export interface BookingRule {
   id: string;
-  days: string[];
-  allDay: boolean;
+  description?: string;
+  days?: string[];
+  allDay?: boolean;
   onlyInPeak?: boolean;
   onlyInOffPeak?: boolean;
   validBefore?: number;
   validAfter?: number;
-  executeUntilDaysBefore?: number;
+  allowDaysAhead?: number;
 
   minLength?: number;
   minDistanceBetweenSlots?: number;
@@ -68,9 +69,12 @@ export interface ExistingBooking {
 }
 
 export interface BookingOption {
-  id: number;
+  id: string;
   title: string;
+  description?: string;
   availableDays: string[];
-  availableAllDay: boolean;
-  availableTimes?: string[];
+  discount?: number;
+  price: number;
+  peakPrice: number;
+  rules: BookingRule[];
 }

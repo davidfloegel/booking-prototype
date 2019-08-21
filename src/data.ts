@@ -1,4 +1,4 @@
-import { ExistingBooking, BookingRule } from "./interfaces";
+import { ExistingBooking, BookingRule, BookingOption } from "./interfaces";
 
 export const openingHours = [
   10,
@@ -44,7 +44,7 @@ export const busySlots: ExistingBooking[] = [
   // { id: 4, from: 23, until: 25 }
 ];
 
-export const peakTimes = {
+export const peakTimes: any = {
   mon: [17, 24],
   tue: [17, 24],
   wed: [17, 24],
@@ -57,3 +57,56 @@ export const peakTimes = {
 export const pricing = {
   mon: { offPeak: 5, onPeak: 10 }
 };
+
+export const bookingOptions: BookingOption[] = [
+  {
+    id: "1",
+    title: "Solo Practice",
+    availableDays: ["mon", "tue", "wed", "thu", "fri"],
+    price: 6.5,
+    peakPrice: 10,
+    description:
+      "Solo slots can only be booked during peak time. You may book last minute solo slots during peak time on the day or day before. Minimum length for peak time is 2 hours, but you may fill any 1h slot that is available",
+    rules: [
+      {
+        id: "SOLO-STANDARD",
+        onlyInOffPeak: true,
+        minDistanceBetweenSlots: 120
+      },
+      {
+        id: "SOLO-PEAK",
+        onlyInPeak: true,
+        allowDaysAhead: 1,
+        minLength: 120,
+        allowFillSlots: true,
+        minDistanceBetweenSlots: 120
+      }
+    ]
+  },
+  {
+    id: "2",
+    title: "Teaching Slot",
+    availableDays: ["mon", "tue", "wed", "thu", "fri"],
+    price: 10,
+    peakPrice: 15,
+    description:
+      "Teaching slots have to be at least 3 hours long. Peak time teaching slots can only be booked on the day or the day before. You may fill any 1h or 2h slots that are available",
+    rules: [
+      {
+        id: "TEACHING-STANDARD",
+        onlyInOffPeak: true,
+        minLength: 180,
+        allowFillSlots: true,
+        minDistanceBetweenSlots: 120
+      },
+      {
+        id: "TEACHING-PEAK",
+        onlyInPeak: true,
+        minLength: 180,
+        allowFillSlots: true,
+        allowDaysAhead: 1,
+        minDistanceBetweenSlots: 120
+      }
+    ]
+  }
+];

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import styled, { css } from "styled-components";
+import * as dateFns from "date-fns";
 import CountUp from "react-countup";
 
 import validateSlot from "./validateBookingRules";
@@ -10,9 +11,10 @@ import {
   bookingRules,
   busySlots,
   peakTimes,
-  pricing
+  pricing,
+  bookingOptions
 } from "./data";
-import { getPriceForTime } from "./util";
+import { isInPeak, getPriceForTime } from "./util";
 
 import Layout from "./components/Layout";
 import DatePicker from "./components/DatePicker";
@@ -32,12 +34,12 @@ const Header = styled.div`
   display: flex;
   align-items: center;
   position: sticky;
-  top: 0;
+  top: 96px;
 `;
 
 const TimeCol = styled.div`
   height: 40px;
-  width: 70px;
+  width: 80px;
   font-size: 14px;
   color: #ccc;
   border-right: 1px solid #ccc;
@@ -57,11 +59,23 @@ const RoomName = styled.div`
   font-weight: bold;
 `;
 
-const App: React.FC = () => {
+const App: React.SFC<any> = ({ match }) => {
   const [currentDay, setCurrentDay] = useState<Date>(new Date());
   const [selectedTimes, setSelectedTimes] = useState<any>([]);
   const [isValid, setIsValid] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string>();
+
+  const bookingOption = bookingOptions.find(
+    bo => bo.id === match.params.option
+  );
+
+  if (!bookingOption) {
+    return <div>booking option not found</div>;
+  }
+
+  const dayabbrev = String(dateFns.format(currentDay, "ddd")).toLowerCase();
+  const isAvailableOnThisDay =
+    bookingOption.availableDays.indexOf(dayabbrev) > -1;
 
   const onClickRow = (time: number, price: number) => {
     setErrorMsg(undefined);
@@ -73,7 +87,7 @@ const App: React.FC = () => {
 
     if (times.length > 1) {
       if (time < times[0]) {
-        return setSelectedTimes([{ time, price: getPriceForTime(time) }]);
+        return setSelectedTimes([{ time, price }]);
       }
     }
 
@@ -95,14 +109,15 @@ const App: React.FC = () => {
       if (times.length >= 1) {
         const rangeStart = times[0];
         for (let i = rangeStart; i <= time; i++) {
-          const price = getPriceForTime(i);
+          const price = isInPeak(dayabbrev, i)
+            ? bookingOption.peakPrice
+            : bookingOption.price;
           addTimes.push({ time: i, price });
         }
 
         updatedTimes = addTimes.sort();
       } else {
         // set initial time
-        const price = getPriceForTime(time);
         addTimes = [{ time, price }];
         updatedTimes = [...selectedTimes, ...addTimes].sort();
       }
@@ -156,6 +171,17 @@ const App: React.FC = () => {
     return total;
   };
 
+  const findRulesWithDaysAhead = bookingOption.rules.filter(
+    (rule: BookingRule) =>
+      rule.allowDaysAhead !== undefined && rule.allowDaysAhead >= 0
+  );
+
+  const currentDayPeakTimes = peakTimes[dayabbrev];
+  const numberDaysAhead = dateFns.differenceInCalendarDays(
+    currentDay,
+    new Date()
+  );
+
   return (
     <Layout>
       <Scrollable>
@@ -164,28 +190,54 @@ const App: React.FC = () => {
           current={currentDay}
           onNavigate={setCurrentDay}
         />
-        <Header>
-          <TimeCol>&nbsp;</TimeCol>
-          <RoomName>The Green Room</RoomName>
-        </Header>
+        {isAvailableOnThisDay ? (
+          <>
+            <Header>
+              <TimeCol>&nbsp;</TimeCol>
+              <RoomName>The Green Room</RoomName>
+            </Header>
 
-        {openingHours.slice(0, openingHours.length - 1).map((x: number) => {
-          const isBusy =
-            busySlots.filter((b: any) => x >= b.from && x < b.until).length > 0;
+            {openingHours.slice(0, openingHours.length - 1).map((x: number) => {
+              const isBusy =
+                busySlots.filter((b: any) => x >= b.from && x < b.until)
+                  .length > 0;
 
-          const isSelected =
-            selectedTimes.map((x: any) => x.time).indexOf(x) > -1;
+              const isSelected =
+                selectedTimes.map((x: any) => x.time).indexOf(x) > -1;
 
-          return (
-            <TimeRow
-              key={x}
-              time={x}
-              isBusy={isBusy}
-              isSelected={isSelected}
-              onClickRow={onClickRow}
-            />
-          );
-        })}
+              const isTimeInPeak = isInPeak(dayabbrev, x);
+              const peakRules = findRulesWithDaysAhead.find(r => r.onlyInPeak);
+              const offPeakRules = findRulesWithDaysAhead.find(
+                r => r.onlyInOffPeak
+              );
+
+              let useRule = isTimeInPeak ? peakRules : offPeakRules;
+              const disable =
+                useRule && useRule.allowDaysAhead !== undefined
+                  ? numberDaysAhead > useRule.allowDaysAhead
+                  : false;
+
+              return (
+                <TimeRow
+                  key={x}
+                  day={dayabbrev}
+                  time={x}
+                  isBusy={isBusy}
+                  price={bookingOption.price}
+                  peakPrice={bookingOption.peakPrice}
+                  isSelected={isSelected}
+                  onClickRow={onClickRow}
+                  disabled={disable}
+                />
+              );
+            })}
+          </>
+        ) : (
+          <div style={{ textAlign: "center", padding: "25px 10px" }}>
+            You can't book {bookingOption.title} on{" "}
+            {dateFns.format(currentDay, "dddd")}s
+          </div>
+        )}
       </Scrollable>
 
       {errorMsg && (

@@ -18,7 +18,7 @@ export const getRulesToVerifiy = (
   slot: [number, number]
 ) => {
   return rules.filter(r => {
-    const isOnDay = r.days.indexOf(day) > -1;
+    const isOnDay = (r.days || []).indexOf(day) > -1;
     const isAllDay = r.allDay;
 
     const validBefore =

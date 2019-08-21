@@ -5,16 +5,18 @@ import Layout from "./components/Layout";
 
 import Offer from "./components/Offers";
 
+import { bookingOptions } from "./data";
+
 const OffersWrapper = styled.div`
   padding: 15px 10px;
 `;
 
-const Offers: React.SFC<any> = () => (
+const Offers: React.SFC<any> = ({ history }) => (
   <Layout>
     <OffersWrapper>
-      <Offer />
-      <Offer />
-      <Offer />
+      {bookingOptions.map(o => (
+        <Offer key={o.id} option={o} history={history} />
+      ))}
     </OffersWrapper>
   </Layout>
 );

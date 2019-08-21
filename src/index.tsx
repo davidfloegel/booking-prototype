@@ -2,13 +2,13 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 import Offers from "./Offers";
-import Calendar from "./Calendar";
+import Selection from "./Selection";
 import * as serviceWorker from "./serviceWorker";
 
 const Main: React.SFC<any> = () => (
   <Router>
     <Route exact path="/" component={Offers} />
-    <Route exact path="/calendar" component={Calendar} />
+    <Route exact path="/selection/:option" component={Selection} />
   </Router>
 );
 

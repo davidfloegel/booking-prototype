@@ -1,7 +1,7 @@
 import React from "react";
 import styled, { css } from "styled-components";
 
-import { getPriceForTime } from "../util";
+import { isInPeak, getPriceForTime } from "../util";
 
 const Header = styled.div`
   border-bottom: 1px solid #ddd;
@@ -17,12 +17,13 @@ const Row = styled(Header)`
 
 const TimeCol = styled.div`
   height: 40px;
-  width: 70px;
+  width: 80px;
   border-right: 1px solid #ddd;
   display: flex;
   font-size: 14px;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  padding: 0 10px;
 `;
 
 const TimeSlot = styled.div<any>`
@@ -34,7 +35,7 @@ const TimeSlot = styled.div<any>`
   text-align: center;
   transition: background 0.15s ease;
 
-  ${({ isBusy, isSelected }) => css`
+  ${({ disabled, isBusy, isSelected }) => css`
     ${!isBusy &&
       css`
         &:hover {
@@ -54,35 +55,68 @@ const TimeSlot = styled.div<any>`
         background: #1dd19f;
         color: #fff;
       `};
+
+    ${disabled &&
+      css`
+        color: #ddd;
+      `};
   `};
 `;
 
+const PeakSign = styled.i`
+  font-size: 8px;
+  border: 1px solid #16a085;
+  color: #16a085;
+  border-radius: 100%;
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
 interface Props {
+  day: string;
   time: number;
   isBusy: boolean;
   isSelected: boolean;
+  price: number;
+  peakPrice: number;
   onClickRow: (t: number, p: number) => void;
+  disabled: boolean;
 }
 
 const TimeRow: React.SFC<Props> = ({
   time,
+  day,
   isBusy,
   isSelected,
+  price,
+  peakPrice,
+  disabled,
   onClickRow
-}) => (
-  <Row key={time}>
-    <TimeCol>
-      {time}
-      :00
-    </TimeCol>
-    <TimeSlot
-      isBusy={isBusy}
-      isSelected={isSelected}
-      onClick={() => (isBusy ? {} : onClickRow(time, getPriceForTime(time)))}
-    >
-      {isBusy ? "Busy" : `£${Number(getPriceForTime(time)).toFixed(2)}`}
-    </TimeSlot>
-  </Row>
-);
+}) => {
+  const isPeak = isInPeak(day, time);
+  const usePrice = isPeak ? peakPrice : price;
+  return (
+    <Row>
+      <TimeCol>
+        <span>
+          {time}
+          :00
+        </span>
+        {!isPeak && <PeakSign className="fa fa-percentage" />}
+      </TimeCol>
+      <TimeSlot
+        isBusy={isBusy}
+        disabled={disabled}
+        isSelected={isSelected}
+        onClick={() => (isBusy || disabled ? {} : onClickRow(time, usePrice))}
+      >
+        {isBusy ? "Busy" : `£${Number(usePrice).toFixed(2)}`}
+      </TimeSlot>
+    </Row>
+  );
+};
 
 export default TimeRow;

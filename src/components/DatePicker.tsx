@@ -5,7 +5,9 @@ import * as dateFns from "date-fns";
 const Picker = styled.div`
   background: #f9f9f9;
   padding: 0 0 10px 0;
-  border-bottom: 1px solid #ddd;
+ border-bottom: 1px solid #ddd;
+position: sticky;
+top: 0;
 `;
 
 const Top = styled.div`

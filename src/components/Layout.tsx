@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import { Link, withRouter } from "react-router-dom";
 
 const Container = styled.div`
   width: 100%;
@@ -16,10 +17,33 @@ const Heading = styled.div`
   margin: 0;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-evenly;
 
   img {
     height: 30px;
+  }
+`;
+
+const Left = styled.div`
+  width: 75px;
+`;
+
+const BackLink = styled(Link)`
+  cursor: pointer;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #576574;
+  display: flex;
+  font-size: 12px;
+  text-decoration: none;
+  align-items: center;
+  text-transform: uppercase;
+
+  i {
+    color: #ff5e57;
+    font-size: 15px;
+    margin-right: 5px;
   }
 `;
 
@@ -27,14 +51,22 @@ interface Props {
   children: any;
 }
 
-const Layout: React.SFC<Props> = ({ children }) => (
+const Layout: React.SFC<any> = ({ children, match, ...rest }) => (
   <Container>
     <Heading>
+      <Left>
+        {match.path === "/selection/:option" && (
+          <BackLink to="/">
+            <i className="fa fa-chevron-left" /> Back
+          </BackLink>
+        )}
+      </Left>
       <img src="/logo.svg" />
+      <Left />
     </Heading>
 
     {children}
   </Container>
 );
 
-export default Layout;
+export default withRouter(Layout);
