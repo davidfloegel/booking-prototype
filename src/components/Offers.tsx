@@ -45,8 +45,8 @@ interface Props {}
 const Offers: React.SFC<any> = ({ history, option }) => {
   const [showDetails, setShowDetails] = useState(false);
   return (
-    <OfferWrapper onClick={() => history.push(`/selection/${option.id}`)}>
-      <Heading>
+    <OfferWrapper>
+      <Heading onClick={() => history.push(`/selection/${option.id}`)}>
         <Title>{option.title}</Title>
         <Price>
           <small>from</small> £{Number(option.price).toFixed(2)} p/h
@@ -56,7 +56,7 @@ const Offers: React.SFC<any> = ({ history, option }) => {
         Available {option.availableDays[0]} -{" "}
         {option.availableDays[option.availableDays.length - 1]}
       </Description>
-      <Trigger onClick={() => setShowDetails(!showDetails)}>
+      <Trigger onClick={e => setShowDetails(!showDetails)}>
         {showDetails ? "Hide" : "Details"}
       </Trigger>
       {showDetails && <Rules>{option.description}</Rules>}
