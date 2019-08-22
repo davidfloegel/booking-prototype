@@ -59,7 +59,7 @@ const RoomName = styled.div`
   font-weight: bold;
 `;
 
-const App: React.SFC<any> = ({ match }) => {
+const App: React.SFC<any> = ({ history, match }) => {
   const [currentDay, setCurrentDay] = useState<Date>(new Date());
   const [selectedTimes, setSelectedTimes] = useState<any>([]);
   const [isValid, setIsValid] = useState<boolean>(false);
@@ -156,7 +156,15 @@ const App: React.SFC<any> = ({ match }) => {
       validateSlot(hours, busySlots, bookingOption.rules, selectedSlot, true);
       setIsValid(true);
 
-      alert("Your booking is valid :)");
+      history.push({
+        pathname: `/finalise`,
+        state: {
+          date: currentDay,
+          bookingOption,
+          selectedTimes,
+          totalPrice: calcTotal()
+        }
+      });
     } catch (e) {
       setIsValid(false);
       setErrorMsg(e.message);

@@ -3,12 +3,14 @@ import ReactDOM from "react-dom";
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 import Offers from "./Offers";
 import Selection from "./Selection";
+import Finalise from "./Finalise";
 import * as serviceWorker from "./serviceWorker";
 
 const Main: React.SFC<any> = () => (
   <Router>
     <Route exact path="/" component={Offers} />
     <Route exact path="/selection/:option" component={Selection} />
+    <Route exact path="/finalise" component={Finalise} />
   </Router>
 );
 
