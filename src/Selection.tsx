@@ -80,7 +80,7 @@ const App: React.SFC<any> = ({ match }) => {
   const onClickRow = (time: number, price: number) => {
     setErrorMsg(undefined);
 
-    const rulesToCheck = bookingRules[0]; // check multiple
+    const rulesToCheck = bookingOption.rules; // check multiple
     const times = selectedTimes.map((x: any) => x.time);
 
     let updatedTimes = selectedTimes;
@@ -132,7 +132,7 @@ const App: React.SFC<any> = ({ match }) => {
         openingHours[0],
         openingHours[openingHours.length - 1]
       ];
-      validateSlot(hours, busySlots, bookingRules, selectedSlot);
+      validateSlot(hours, busySlots, bookingOption.rules, selectedSlot);
 
       setSelectedTimes(updatedTimes);
       setIsValid(true);
@@ -153,7 +153,7 @@ const App: React.SFC<any> = ({ match }) => {
         openingHours[0],
         openingHours[openingHours.length - 1]
       ];
-      validateSlot(hours, busySlots, bookingRules, selectedSlot, true);
+      validateSlot(hours, busySlots, bookingOption.rules, selectedSlot, true);
       setIsValid(true);
 
       alert("Your booking is valid :)");
