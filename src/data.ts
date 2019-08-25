@@ -18,6 +18,16 @@ export const openingHours = [
   24
 ];
 
+export const dailyOpeningHours: any = {
+  mon: [10, 24],
+  tue: [10, 24],
+  wed: [10, 24],
+  thu: [10, 24],
+  fri: [10, 24],
+  sat: [10, 22],
+  sun: [10, 22]
+};
+
 export const bookingRules: BookingRule[] = [
   {
     id: "MIN-3-HOURS-DURING-PEAK",
@@ -50,8 +60,8 @@ export const peakTimes: any = {
   wed: [17, 24],
   thu: [17, 24],
   fri: [17, 24],
-  sat: [14, 23],
-  sun: [14, 23]
+  sat: [14, 22],
+  sun: [14, 22]
 };
 
 export const pricing = {
@@ -85,7 +95,7 @@ export const bookingOptions: BookingOption[] = [
   },
   {
     id: "2",
-    title: "Teaching Slot",
+    title: "Band & Teaching Slot",
     availableDays: ["mon", "tue", "wed", "thu", "fri"],
     price: 10,
     peakPrice: 15,
@@ -105,6 +115,25 @@ export const bookingOptions: BookingOption[] = [
         minLength: 180,
         allowFillSlots: true,
         allowDaysAhead: 1,
+        minDistanceBetweenSlots: 120
+      }
+    ]
+  },
+  {
+    id: "3",
+    title: "Weekend Bookings",
+    availableDays: ["sat", "sun"],
+    price: 10,
+    peakPrice: 12,
+    description:
+      "On weekends you can only book 4 hours or any gaps you might find.",
+    rules: [
+      {
+        id: "WEEKEND-STANDARD",
+        minLength: 240,
+        requireMultiplesOfLength: true,
+        bookingInterval: 240,
+        allowFillSlots: true,
         minDistanceBetweenSlots: 120
       }
     ]

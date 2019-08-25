@@ -15,9 +15,10 @@ const Heading = styled.div`
   border-bottom: 1px solid #ccc;
   box-shadow: 0px -2px 5px 0px rgba(0, 0, 0, 0.25);
   margin: 0;
+  padding: 0 10px;
   display: flex;
   align-items: center;
-  justify-content: space-evenly;
+  justify-content: space-between;
 
   img {
     height: 30px;
@@ -26,6 +27,17 @@ const Heading = styled.div`
 
 const Left = styled.div`
   width: 75px;
+  display: flex;
+  align-items: center;
+  font-size: 11px;
+  cursor: pointer;
+  i {
+    margin-left: 5px;
+  }
+`;
+
+const Right = styled(Left)`
+  justify-content: flex-end;
 `;
 
 const BackLink = styled(Link)`
@@ -49,9 +61,17 @@ const BackLink = styled(Link)`
 
 interface Props {
   children: any;
+  enabled?: boolean;
+  enableSetBusySlots?: any;
 }
 
-const Layout: React.SFC<any> = ({ children, match, ...rest }) => (
+const Layout: React.SFC<any> = ({
+  children,
+  match,
+  enableSetBusySlots,
+  enabled,
+  ...rest
+}) => (
   <Container>
     <Heading>
       <Left>
@@ -61,8 +81,15 @@ const Layout: React.SFC<any> = ({ children, match, ...rest }) => (
           </BackLink>
         )}
       </Left>
-      <img src="/logo.svg" />
-      <Left />
+      <img alt="logo" src="/logo.svg" />
+      {enableSetBusySlots ? (
+        <Right onClick={() => enableSetBusySlots()}>
+          {enabled ? "Done" : "Set Fake Busy Slots"}
+          <i className={`fa ${enabled ? "fa-check" : "fa-cog"}`} />
+        </Right>
+      ) : (
+        <Left />
+      )}
     </Heading>
 
     {children}

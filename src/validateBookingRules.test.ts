@@ -98,17 +98,63 @@ describe("validateBookingRules", () => {
     });
   });
 
-  it("throws an error if slot does not match minLength", () => {
-    const rules: BookingRule[] = [
-      { id: "1", days: ["tue"], allDay: true, minLength: 180 }
-    ];
-    expect(() =>
-      validateSlot(openingHours, [], rules, [13, 14], true)
-    ).toThrowError("You have to book at least 3 hours");
+  describe("minLength", () => {
+    it("throws an error if slot does not match minLength", () => {
+      const rules: BookingRule[] = [
+        { id: "1", days: ["tue"], allDay: true, minLength: 180 }
+      ];
+      expect(() =>
+        validateSlot(openingHours, [], rules, [13, 14], true)
+      ).toThrowError("You have to book at least 3 hours");
 
-    expect(() =>
-      validateSlot(openingHours, [], rules, [12, 14])
-    ).not.toThrowError();
+      expect(() =>
+        validateSlot(openingHours, [], rules, [12, 14])
+      ).not.toThrowError();
+    });
+
+    it("throws an error if requireMultiplesOfLengths is set to true", () => {
+      const rules: BookingRule[] = [
+        {
+          id: "1",
+          days: ["tue"],
+          allDay: true,
+          minLength: 120,
+          requireMultiplesOfLength: true
+        }
+      ];
+
+      expect(() =>
+        validateSlot(openingHours, [], rules, [13, 15], true)
+      ).toThrowError(
+        "You have to book in multiples of 2 hours (i.e. 2h, 4h, 6h etc...)"
+      );
+
+      expect(() =>
+        validateSlot(openingHours, [], rules, [12, 13])
+      ).not.toThrowError();
+    });
+  });
+
+  describe("bookingInterval", () => {
+    it("throws an error if the user tries booking an a time that is not a correct interval", () => {
+      const rules: BookingRule[] = [
+        {
+          id: "1",
+          days: ["tue"],
+          allDay: true,
+          minLength: 120,
+          bookingInterval: 240
+        }
+      ];
+
+      expect(() => validateSlot([10, 22], [], rules, [13, 13])).toThrowError(
+        "You can only book slots starting at 10:00, 14:00, 18:00"
+      );
+
+      expect(() =>
+        validateSlot(openingHours, [], rules, [10, 10])
+      ).not.toThrowError();
+    });
   });
 
   describe("minDistanceBetweenSlots", () => {
@@ -131,13 +177,13 @@ describe("validateBookingRules", () => {
 
     it("throws an error if slot is too close to closing hour", () => {
       expect(() =>
-        validateSlot(openingHours, [], rules, [18, 22])
+        validateSlot(openingHours, [], rules, [18, 22], true)
       ).toThrowError(
         "Please leave no gap or at least 2 hours between the closing hour and your slot"
       );
 
       expect(() =>
-        validateSlot(openingHours, [], rules, [18, 21])
+        validateSlot(openingHours, [], rules, [18, 21], true)
       ).not.toThrowError();
     });
 
@@ -170,6 +216,20 @@ describe("validateBookingRules", () => {
       ).toThrowError(
         "Please leave no gap or at least 2 hours between existing bookings and your slot"
       );
+    });
+
+    it("allows the user to book slots straight after the first busy slot if busy slot is the first hours of the day", () => {
+      const existing: ExistingBooking[] = [{ id: 1, from: 10, until: 11 }];
+      expect(() =>
+        validateSlot(openingHours, existing, rules, [11, 13])
+      ).not.toThrowError();
+    });
+
+    it("allows the user to book slots up to last busy slot if busy slot is the last hour(s) of the day", () => {
+      const existing: ExistingBooking[] = [{ id: 1, from: 23, until: 24 }];
+      expect(() =>
+        validateSlot(openingHours, existing, rules, [16, 23], true)
+      ).not.toThrowError();
     });
   });
 

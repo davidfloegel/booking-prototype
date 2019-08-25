@@ -1,7 +1,7 @@
 import React from "react";
 import styled, { css } from "styled-components";
 
-import { isInPeak, getPriceForTime } from "../util";
+import { isInPeak } from "../util";
 
 const Header = styled.div`
   border-bottom: 1px solid #ddd;
@@ -84,6 +84,7 @@ interface Props {
   peakPrice: number;
   onClickRow: (t: number, p: number) => void;
   disabled: boolean;
+  debugMode: boolean;
 }
 
 const TimeRow: React.SFC<Props> = ({
@@ -94,7 +95,8 @@ const TimeRow: React.SFC<Props> = ({
   price,
   peakPrice,
   disabled,
-  onClickRow
+  onClickRow,
+  debugMode
 }) => {
   const isPeak = isInPeak(day, time);
   const usePrice = isPeak ? peakPrice : price;
@@ -111,7 +113,9 @@ const TimeRow: React.SFC<Props> = ({
         isBusy={isBusy}
         disabled={disabled}
         isSelected={isSelected}
-        onClick={() => (isBusy || disabled ? {} : onClickRow(time, usePrice))}
+        onClick={() =>
+          !debugMode && (isBusy || disabled) ? {} : onClickRow(time, usePrice)
+        }
       >
         {isBusy ? "Busy" : `£${Number(usePrice).toFixed(2)}`}
       </TimeSlot>

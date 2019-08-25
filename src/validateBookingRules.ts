@@ -1,6 +1,7 @@
 import _ from "lodash";
 
 import { BookingRule, ExistingBooking } from "./interfaces";
+import { getBookingIntervalStartingTimes } from "./util";
 
 /**
  * TODO
@@ -77,11 +78,11 @@ export default (
 
     const isRangeSelection = selectedSlot[0] < selectedSlot[1];
 
-    if (rule.minLength && isFinalCheck) {
+    if (rule.minLength) {
       // check if slot length is matching the minimum booking length
       const length = (selectedSlot[1] + 1 - selectedSlot[0]) * 60;
 
-      if (length < rule.minLength) {
+      if (length < rule.minLength && isFinalCheck) {
         let ignoreMinLengthRule = false;
         if (rule.allowFillSlots) {
           // check whether the user is filling a slot less than min booking length
@@ -111,32 +112,78 @@ export default (
           );
         }
       }
+
+      if (length > rule.minLength) {
+        if (rule.requireMultiplesOfLength && isRangeSelection) {
+          const length = (selectedSlot[1] + 1 - selectedSlot[0]) * 60;
+
+          const isMultiple = length % rule.minLength === 0;
+          const inHours = rule.minLength / 60;
+
+          if (!isMultiple) {
+            throw new Error(
+              `You have to book in multiples of ${inHours} hours (i.e. ${inHours}h, ${inHours *
+                2}h, ${inHours * 3}h etc...)`
+            );
+          }
+        }
+      }
+
+      if (!isRangeSelection && rule.bookingInterval) {
+        const times = getBookingIntervalStartingTimes(
+          openingHours,
+          rule.bookingInterval
+        );
+
+        if (times.indexOf(selectedSlot[0]) === -1) {
+          const allowedSlotsToString = _.join(
+            _.map(times, t => `${t}:00`),
+            ", "
+          );
+          throw new Error(
+            `You can only book slots starting at ${allowedSlotsToString}`
+          );
+        }
+      }
     }
 
     if (rule.minDistanceBetweenSlots) {
       // check if enough distance to opening time
       const distanceToOpeningHour = (selectedSlot[0] - openingHours[0]) * 60;
+
       if (
         distanceToOpeningHour > 0 &&
         distanceToOpeningHour < rule.minDistanceBetweenSlots
       ) {
-        throw new Error(
-          `Please leave no gap or at least ${rule.minDistanceBetweenSlots /
-            60} hours between the opening hour and your slot`
-        );
+        const lengthBefore = _.sum(_.map(before, e => e.until + 1 - e.from));
+
+        if (lengthBefore * 60 === 0) {
+          throw new Error(
+            `Please leave no gap or at least ${rule.minDistanceBetweenSlots /
+              60} hours between the opening hour and your slot`
+          );
+        }
       }
 
       // check if enough distance to closing time
       const distanceToClosingHour =
         (openingHours[1] - 1 - selectedSlot[1]) * 60;
       if (
+        isFinalCheck &&
         distanceToClosingHour > 0 &&
         distanceToClosingHour < rule.minDistanceBetweenSlots
       ) {
-        throw new Error(
-          `Please leave no gap or at least ${rule.minDistanceBetweenSlots /
-            60} hours between the closing hour and your slot`
-        );
+        // check if there's busy slots on the last hour as that would mean
+        // the user can book up to this time
+
+        const lengthAfter = _.sum(_.map(after, e => e.until + 1 - e.from));
+
+        if (lengthAfter * 60 === 0) {
+          throw new Error(
+            `Please leave no gap or at least ${rule.minDistanceBetweenSlots /
+              60} hours between the closing hour and your slot`
+          );
+        }
       }
 
       // check if enough distance to preceeding booking

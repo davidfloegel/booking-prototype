@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import styled, { css } from "styled-components";
+import styled from "styled-components";
 
 const OfferWrapper = styled.div`
   border-bottom: 1px solid #ddd;

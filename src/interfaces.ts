@@ -31,6 +31,16 @@
  *  minLength: 180
  *    - the minimum length in minutes a user has to book
  *
+ *  requireMultipleOfLength: true/false
+ *    - i.e. if minLength is 2 hours, can user book 3 hours? If set to true,
+ *      user can only book in multiples of 2 i.e. 2h, 4h, 6h
+ *
+ *  bookingInterval: number
+ *    - can user start booking at any time? If set to 0/undefined, they can start
+ *      the booking at any time if set to 2h for example they can only start
+ *      their booking every 2 hours from the rule start time. this rule should go
+ *      only in combination with minLength && requireMultiplesOfLength
+ *
  *  minDistanceBetweenSlots: 120
  *    - can the user leave any amount of time between bookings & opening hours?
  *      If this is set to i.e. 120 it means the user has to leave no gap or at least
@@ -56,9 +66,11 @@ export interface BookingRule {
   allowDaysAhead?: number;
 
   minLength?: number;
+  requireMultiplesOfLength?: boolean;
+  bookingInterval?: number;
   minDistanceBetweenSlots?: number;
 
-  allowFillSlots?: true;
+  allowFillSlots?: boolean;
   allowPeakOverlap?: boolean;
 }
 

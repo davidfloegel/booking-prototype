@@ -90,8 +90,6 @@ const Finalise: React.SFC<any> = ({ history, location }) => {
 
   const { state } = location;
 
-  console.log(state);
-
   if (!state) {
     history.push("/");
   }
@@ -133,7 +131,7 @@ const Finalise: React.SFC<any> = ({ history, location }) => {
             <h4>
               {dateFns.format(date, "dddd, DD MMMM YYYY")}
               <br /> {selectedTimes[0].time}
-              :00 - {selectedTimes[selectedTimes.length - 1].time}
+              :00 - {selectedTimes[selectedTimes.length - 1].time + 1}
               :00
             </h4>
           </Summary>
@@ -158,6 +156,7 @@ const Finalise: React.SFC<any> = ({ history, location }) => {
             <Label>Your Name*</Label>
             <Input
               placeholder="First + Last name"
+              value={name}
               onChange={e => setName(e.target.value)}
             />
           </FormGroup>
@@ -167,6 +166,7 @@ const Finalise: React.SFC<any> = ({ history, location }) => {
             <Input
               placeholder="john@doe.com"
               type="email"
+              value={email}
               onChange={e => setEmail(e.target.value)}
             />
           </FormGroup>
@@ -175,6 +175,7 @@ const Finalise: React.SFC<any> = ({ history, location }) => {
             <Label>Phone Number</Label>
             <Input
               placeholder="Optional"
+              value={phone}
               onChange={e => setPhone(e.target.value)}
             />
           </FormGroup>
@@ -184,6 +185,7 @@ const Finalise: React.SFC<any> = ({ history, location }) => {
           <Heading>Notes & Requests</Heading>
           <Textarea
             placeholder="Enter any additional information, requests or similar..."
+            value={notes}
             onChange={e => setNotes(e.target.value)}
           />
         </Section>
@@ -192,12 +194,17 @@ const Finalise: React.SFC<any> = ({ history, location }) => {
           <Heading>Promo Codes</Heading>
           Have a Promo Code? Enter it here and save some money!
           <div style={{ height: "10px" }} />
-          <Input placeholder="Enter Promo Code..." onChange={changeCode} />
+          <Input
+            placeholder="Enter Promo Code..."
+            value={code}
+            onChange={changeCode}
+          />
         </Section>
       </Scroll>
 
       <Footer
         total={calcFinalPrice()}
+        noAnimation
         onConfirm={() => alert("yo")}
         isValid={isValid}
       />
