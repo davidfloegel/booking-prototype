@@ -42,7 +42,7 @@ export default (
 ) => {
   // check if bookings starts + ends within opening hours
   const startsBeforeOpening = selectedSlot[0] < openingHours[0];
-  const endsAfterClosing = selectedSlot[1] >= openingHours[1];
+  const endsAfterClosing = selectedSlot[1] > openingHours[1];
 
   if (startsBeforeOpening || endsAfterClosing) {
     throw new Error(
@@ -76,21 +76,27 @@ export default (
       (b: ExistingBooking) => b.from >= selectedSlot[1]
     );
 
+    // TODO
+    // improve this. technically if only the first time is selected, the selectedSlot
+    // array should only have ONE entry
     const isRangeSelection = selectedSlot[0] < selectedSlot[1];
 
     if (rule.minLength) {
       // check if slot length is matching the minimum booking length
-      const length = (selectedSlot[1] + 1 - selectedSlot[0]) * 60;
+      const length = (selectedSlot[1] - selectedSlot[0]) * 60;
 
       if (length < rule.minLength && isFinalCheck) {
         let ignoreMinLengthRule = false;
         if (rule.allowFillSlots) {
           // check whether the user is filling a slot less than min booking length
-          // if (before.length > 0 && after.length > 0) {
-          const last = before[before.length - 1];
-          const first = after[0];
+          // if there's no slot before, set the previous slot as ending on "opening hour"
+          // if there's no slot after, set the following slot as starting on "closing hour"
+          const last = before[before.length - 1] || { until: openingHours[0] };
+          const first = after[0] || { from: openingHours[1] };
 
-          const isWithinSlot = before.length > 0 && after.length > 0;
+          const isWithinSlot =
+            (selectedSlot[0] === openingHours[0] || before.length > 0) &&
+            (selectedSlot[1] === openingHours[1] || after.length > 0);
 
           const distance = first && last ? (first.from - last.until) * 60 : 0;
 
@@ -100,6 +106,8 @@ export default (
                 60} hours or fill the entire spot`
             );
           }
+
+          console.log(last, first, selectedSlot, isWithinSlot, length, distance)
 
           if (isWithinSlot && length === distance) {
             ignoreMinLengthRule = true;
@@ -115,8 +123,6 @@ export default (
 
       if (length > rule.minLength) {
         if (rule.requireMultiplesOfLength && isRangeSelection) {
-          const length = (selectedSlot[1] + 1 - selectedSlot[0]) * 60;
-
           const isMultiple = length % rule.minLength === 0;
           const inHours = rule.minLength / 60;
 

@@ -33,7 +33,7 @@ const TimeSlot = styled.div<any>`
   justify-content: center;
   flex: 1;
   text-align: center;
-  transition: background 0.15s ease;
+  transition: all 0.15s ease;
 
   ${({ disabled, isBusy, isSelected }) => css`
     ${!isBusy &&

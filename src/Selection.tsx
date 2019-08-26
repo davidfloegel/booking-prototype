@@ -96,6 +96,7 @@ const App: React.SFC<any> = ({ history, match }) => {
 
     let updatedTimes = selectedTimes;
 
+    // TODO needed?
     if (times.length > 1) {
       if (time < times[0]) {
         return setSelectedTimes([{ time, price }]);
@@ -137,7 +138,7 @@ const App: React.SFC<any> = ({ history, match }) => {
     try {
       const selectedSlot: [number, number] = [
         updatedTimes[0].time,
-        updatedTimes[updatedTimes.length - 1].time
+        updatedTimes[updatedTimes.length - 1].time + 1
       ];
       const hours: [number, number] = [
         openingHoursForToday[0],
@@ -158,7 +159,7 @@ const App: React.SFC<any> = ({ history, match }) => {
     try {
       const selectedSlot: [number, number] = [
         updatedTimes[0].time,
-        updatedTimes[updatedTimes.length - 1].time
+        updatedTimes[updatedTimes.length - 1].time + 1
       ];
       const hours: [number, number] = [
         openingHoursForToday[0],

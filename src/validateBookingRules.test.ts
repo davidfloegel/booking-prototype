@@ -124,13 +124,13 @@ describe("validateBookingRules", () => {
       ];
 
       expect(() =>
-        validateSlot(openingHours, [], rules, [13, 15], true)
+        validateSlot(openingHours, [], rules, [13, 16], true)
       ).toThrowError(
         "You have to book in multiples of 2 hours (i.e. 2h, 4h, 6h etc...)"
       );
 
       expect(() =>
-        validateSlot(openingHours, [], rules, [12, 13])
+        validateSlot(openingHours, [], rules, [12, 14], true)
       ).not.toThrowError();
     });
   });
@@ -254,6 +254,42 @@ describe("validateBookingRules", () => {
       ).toThrowError("You have to book at least 3 hours");
     });
 
+    it("does not throw an error if user fills a slot starting from opening hour to first slot", () => {
+      const rules: BookingRule[] = [
+        {
+          id: "1",
+          days: ["mon"],
+          allDay: true,
+          minLength: 120,
+          allowFillSlots: true
+        }
+      ];
+
+      const existing = [{ id: 1, from: 11, until: 15 }];
+
+      expect(() =>
+        validateSlot(openingHours, existing, rules, [10, 11], true)
+      ).not.toThrowError();
+    });
+
+    it("does not throw an error if user fills a slot starting after last busy slot and ending on closing hour", () => {
+      const rules: BookingRule[] = [
+        {
+          id: "1",
+          days: ["mon"],
+          allDay: true,
+          minLength: 120,
+          allowFillSlots: true
+        }
+      ];
+
+      const existing = [{ id: 1, from: 18, until: 23 }];
+
+      expect(() =>
+        validateSlot(openingHours, existing, rules, [23, 24], true)
+      ).not.toThrowError();
+    });
+
     it("does not throw an error if user is allowed to fill slots with length less than minLength", () => {
       const rules: BookingRule[] = [
         {
@@ -271,7 +307,7 @@ describe("validateBookingRules", () => {
       ];
 
       expect(() =>
-        validateSlot(openingHours, existing, rules, [15, 17])
+        validateSlot(openingHours, existing, rules, [15, 17], true)
       ).not.toThrowError();
     });
   });
